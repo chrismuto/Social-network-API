@@ -40,4 +40,14 @@ module.exports = {
             return res.status(500).json(err);
         });
       },
+      deleteThought(req, res) {
+        Thought.findOneAndDelete({ _id: req.params.id })
+          .then((thought) =>
+            !thought
+              ? res.status(404).json({ message: 'No thought with that ID' })
+              : User.deleteMany({ _id: { $in: thought.User } })
+          )
+          .then(() => res.json({ message: 'Course and students deleted!' }))
+          .catch((err) => res.status(500).json(err));
+      },
 }
