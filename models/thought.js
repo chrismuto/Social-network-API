@@ -1,5 +1,24 @@
 const { Schema, model } = require('mongoose');
-const reactionSchema = require('./reaction');
+
+const reactionSchema = new Schema({
+    reactionText: {
+        type: String,
+        minlength: 1,
+        maxlength: 280,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
+    username: {
+        type: String,
+        required: true,
+    },
+}, {
+    toJSON: {
+        getters: true,
+    },
+});
 
 // Schema to create thought model
 const thoughtSchema = new Schema({
@@ -7,11 +26,12 @@ const thoughtSchema = new Schema({
         type: String,
         required: true,
         unique: true,
-        length: [1, 280],
+        minlength: 1,
+        maxlength: 280,
     },
     createdAt: {
         type: Date,
-        default: "insert current time stamp - use getter method to format",
+        default: Date.now,
     },
     username: {
         type: String,
@@ -25,6 +45,7 @@ const thoughtSchema = new Schema({
     },
 });
 
-const thought = model('thought', thoughtSchema);
 
-module.exports = thought;
+const Thought = model('Thought', thoughtSchema);
+
+module.exports = Thought;
