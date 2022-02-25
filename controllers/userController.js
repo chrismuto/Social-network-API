@@ -3,7 +3,11 @@ const { User } = require('../models');
 module.exports = {
   // Get all users
   getUsers(req, res) {
-    User.find({})
+    User.find({}).populate("thoughts", {
+      thoughtText: 1,
+      username: 1,
+      createdAt: 1
+    })
       .then(async (users) => {
         return res.json(users);
       })
