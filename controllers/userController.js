@@ -1,5 +1,6 @@
-const { User } = require('../models');
+const { User, Thought } = require('../models');
 
+// Update an existing user
 const updateUser = async (req, res) => {
   try {
     let user = await User.findOneAndUpdate(
@@ -33,6 +34,8 @@ module.exports = {
         return res.status(500).json(err);
     });
   },
+
+  // Create a new user
   createUser(req, res) {
     User.create(req.body)
     .then(newUser => {
@@ -46,6 +49,8 @@ module.exports = {
       return res.status(500).json(err);
     });
   },
+
+  // Get a single user by ID
   getOneUser(req, res) {
     User.findOne( { _id: req.params.id } ).populate("thoughts", {
       thoughtText: 1,
@@ -60,15 +65,19 @@ module.exports = {
         return res.status(500).json(err);
     });
   },
+
+  // Delete a specific user by ID
   deleteUser(req, res) {
     User.findOneAndDelete({ _id: req.params.id })
       .then((user) =>
         !user
           ? res.status(404).json({ message: 'No user with that ID' })
-          : User.deleteMany({ _id: { $in: user.Thought } })
+          : Thought.deleteMany({ _id: { $in: user.thoughts } })
       )
       .then(() => res.json({ message: 'User deleted!' }))
       .catch((err) => res.status(500).json(err));
   },
+
+  //exports updateUser function that used async/await syntax
   updateUser
 }

@@ -3,23 +3,22 @@ const {
   User
 } = require('../models');
 
+// Create a new post
 const postThoughts = async (req, res) => {
   try {
     let newThought = await Thought.create(req.body)
-    let newThoughtId = newThought._id;
-
-    let user = await User.findOne({
-      id: req.body.userId
-    });
-    user.thoughts = user.thoughts.concat(newThoughtId)
-    await user.save()
-
+    let user = await User.findOneAndUpdate(
+      { username: req.body.username },
+      { $addToSet: { thoughts: newThought._id } },
+      { new: true }
+      );
     return res.json(newThought)
   } catch (err) {
     res.status(500).json(err)
   }
 }
 
+// Update a new post
 const updateThought = async (req, res) => {
   try {
     let thought = await Thought.findOneAndUpdate(
@@ -36,6 +35,7 @@ const updateThought = async (req, res) => {
   }
 }
 
+// Get all posts
 function getThoughts(req, res) {
   Thought.find()
     .then((thoughts) => {
@@ -47,6 +47,7 @@ function getThoughts(req, res) {
     });
 }
 
+// Get a specific post
 function getOneThought(req, res) {
   Thought.findOne({
       _id: req.params.id
@@ -60,6 +61,7 @@ function getOneThought(req, res) {
     });
 }
 
+// Delete a post
 function deleteThought(req, res) {
   Thought.findOneAndDelete({
       _id: req.params.id
@@ -81,10 +83,63 @@ function deleteThought(req, res) {
     .catch((err) => res.status(500).json(err));
 }
 
+// Reactions are a sin
+function deleteReaction(req, res) {
+  Thought.findOneAndDelete({
+      _id: req.params.id
+    })
+    .then((reaction) =>
+      !reaction ?
+      res.status(404).json({
+        message: 'No reaction with that ID'
+      }) :
+      Thought.deleteMany({
+        _id: {
+          $in: reaction.Thought
+        }
+      })
+    )
+    .then(() => res.json({
+      message: 'Course and students deleted!'
+    }))
+    .catch((err) => res.status(500).json(err));
+}
+
+// Reactions are a sin against Nature
+function getReaction(req, res) {
+  Thought.find()
+    .then((thoughts) => {
+      return res.json(thoughts);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json(err);
+    });
+}
+
+// Reactions are the worst
+const createReaction = async (req, res) => {
+  try {
+    let newReaction = await reactionSchema.create(req.body)
+    let user = await Thought.findOneAndUpdate(
+      { _id: req.params.id },
+      { $addToSet: { thoughts: newReaction._id } },
+      { new: true }
+      );
+      console.log(newReaction)
+    return res.json(newReaction)
+  } catch (err) {
+    res.status(500).json(err)
+  }
+}
+
 module.exports = {
   postThoughts,
   getThoughts,
   getOneThought,
   deleteThought,
-  updateThought
+  updateThought,
+  getReaction,
+  createReaction,
+  deleteReaction
 }
