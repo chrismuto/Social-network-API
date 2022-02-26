@@ -1,5 +1,22 @@
 const { User } = require('../models');
 
+const updateUser = async (req, res) => {
+  try {
+    let user = await User.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: req.body },
+      { new: true }
+      )
+      console.log(user)
+      !user
+      ? res.status(404).json({ message: "That thought does not exist!" })
+      : res.json(user)
+  } catch (err) {
+    res.status(500).json(err)
+    console.log(err)
+  }
+}
+
 module.exports = {
   // Get all users
   getUsers(req, res) {
@@ -53,4 +70,5 @@ module.exports = {
       .then(() => res.json({ message: 'User deleted!' }))
       .catch((err) => res.status(500).json(err));
   },
+  updateUser
 }

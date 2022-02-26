@@ -27,8 +27,7 @@ const updateThought = async (req, res) => {
       { $set: req.body },
       { new: true }
       )
-      console.log(thought)
-      // !thought
+      !thought
       ? res.status(404).json({ message: "That thought does not exist!" })
       : res.json(thought)
   } catch (err) {
