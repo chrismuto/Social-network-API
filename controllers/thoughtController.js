@@ -1,6 +1,7 @@
 const {
   Thought,
-  User
+  User,
+  Reaction
 } = require('../models');
 
 // Create a new post
@@ -78,41 +79,41 @@ function deleteThought(req, res) {
       })
     )
     .then(() => res.json({
-      message: 'Course and students deleted!'
+      message: 'Thought deleted!'
     }))
     .catch((err) => res.status(500).json(err));
 }
 
 // Reactions are a sin
 function deleteReaction(req, res) {
-  Thought.findOneAndDelete({
-      _id: req.params.id
-    })
+  Reaction.findOneAndUpdate(
+    { _id: req.body._id },
+    { $pull: { reactions: { _id: req.params._id } } },
+  )
     .then((reaction) =>
       !reaction ?
       res.status(404).json({
         message: 'No reaction with that ID'
       }) :
-      Thought.deleteMany({
+      Reaction.deleteMany({
         _id: {
-          $in: reaction.Thought
+          $in: reaction.Reaction
         }
       })
     )
     .then(() => res.json({
-      message: 'Course and students deleted!'
+      message: 'Reaction deleted!'
     }))
-    .catch((err) => res.status(500).json(err));
+    .catch((err) => res.status(500));
 }
 
 // Reactions are a sin against Nature
 function getReaction(req, res) {
-  Thought.find()
-    .then((thoughts) => {
-      return res.json(thoughts);
+  Reaction.find()
+    .then((reactions) => {
+      return res.json(reactions);
     })
     .catch((err) => {
-      console.log(err);
       return res.status(500).json(err);
     });
 }
@@ -120,10 +121,10 @@ function getReaction(req, res) {
 // Reactions are the worst
 const createReaction = async (req, res) => {
   try {
-    let newReaction = await reactionSchema.create(req.body)
+    let newReaction = await Reaction.create(req.body)
     let user = await Thought.findOneAndUpdate(
       { _id: req.params.id },
-      { $addToSet: { thoughts: newReaction._id } },
+      { $addToSet: { reactions: newReaction } },
       { new: true }
       );
       console.log(newReaction)
