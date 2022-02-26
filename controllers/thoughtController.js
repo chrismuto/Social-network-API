@@ -3,28 +3,6 @@ const {
   User
 } = require('../models');
 
-// module.exports = {
-// Post thought
-// postThoughts(req, res) {
-//   Thought.create(req.body)
-//     .then(newPost => {
-//       console.log(req.body)
-//       User.findOneAndUpdate(
-//         { _id: req.body.userId },
-//         { $addToSet: { thoughts: newPost._id } },
-//         {new: true},
-//         )
-//         res.json(newPost)
-//     })
-//     .then(postCheck => {
-//       console.log(postCheck)
-//         if (!postCheck) {
-//             return res.status(404)
-//         }
-//         return res.json("you shared a thought!")
-//     })
-//     .catch((err) => res.status(500));
-// },
 const postThoughts = async (req, res) => {
   try {
     let newThought = await Thought.create(req.body)
@@ -33,13 +11,29 @@ const postThoughts = async (req, res) => {
     let user = await User.findOne({
       id: req.body.userId
     });
-    console.log(user)
     user.thoughts = user.thoughts.concat(newThoughtId)
     await user.save()
 
     return res.json(newThought)
   } catch (err) {
-    res.status(500)
+    res.status(500).json(err)
+  }
+}
+
+const updateThought = async (req, res) => {
+  try {
+    let thought = await Thought.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: req.body },
+      { new: true }
+      )
+      console.log(thought)
+      // !thought
+      ? res.status(404).json({ message: "That thought does not exist!" })
+      : res.json(thought)
+  } catch (err) {
+    res.status(500).json(err)
+    console.log(err)
   }
 }
 
@@ -92,5 +86,6 @@ module.exports = {
   postThoughts,
   getThoughts,
   getOneThought,
-  deleteThought
+  deleteThought,
+  updateThought
 }
