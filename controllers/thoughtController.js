@@ -9,7 +9,7 @@ const postThoughts = async (req, res) => {
   try {
     let newThought = await Thought.create(req.body)
     let user = await User.findOneAndUpdate(
-      { username: req.body.username },
+      { _id: req.body.userId },
       { $addToSet: { thoughts: newThought._id } },
       { new: true }
       );
@@ -86,16 +86,17 @@ function deleteThought(req, res) {
 
 // Reactions are a sin
 function deleteReaction(req, res) {
-  Reaction.findOneAndUpdate(
-    { _id: req.body._id },
-    { $pull: { reactions: { _id: req.params._id } } },
+  console.log(req.params.id)
+  Thought.findOneAndUpdate(
+    { _id: req.params.thoughtId },
+    { $pull: { reactions: { reactionId: req.params.id } } },
   )
     .then((reaction) =>
       !reaction ?
       res.status(404).json({
         message: 'No reaction with that ID'
       }) :
-      Reaction.deleteMany({
+      Thought.deleteMany({
         _id: {
           $in: reaction.Reaction
         }
